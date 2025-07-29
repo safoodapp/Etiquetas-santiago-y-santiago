@@ -86,7 +86,6 @@ if usar_fecha_descongelacion:
     st.text_input("Fecha de caducidad", value=fecha_caducidad.strftime("%d/%m/%Y"), disabled=True)
 else:
     fecha_caducidad = st.date_input("Fecha de caducidad (manual)", format="DD/MM/YYYY")
-
 # Botón de generar
 if st.button("✅ Generar etiqueta"):
     campos = {
@@ -103,22 +102,22 @@ if st.button("✅ Generar etiqueta"):
         "fecha_caducidad": fecha_caducidad.strftime("%d/%m/%Y") if fecha_caducidad else ""
     }
 
-# Validación de campos obligatorios
-campos_obligatorios = {
-    "Producto": producto,
-    "Forma de captura": forma,
-    "Zona de captura": zona,
-    "País de origen": pais,
-    "Arte de pesca": arte,
-    "Peso": peso,
-    "Lote": lote
-}
+    # Validación de campos obligatorios
+    campos_obligatorios = {
+        "Producto": producto,
+        "Forma de captura": forma,
+        "Zona de captura": zona,
+        "País de origen": pais,
+        "Arte de pesca": arte,
+        "Peso": peso,
+        "Lote": lote
+    }
 
-faltan = [k for k, v in campos_obligatorios.items() if not v or v == "Selecciona una opción"]
+    faltan = [k for k, v in campos_obligatorios.items() if not v or v == "Selecciona una opción"]
 
-if faltan:
-    st.warning(f"Debes completar todos los campos obligatorios: {', '.join(faltan)}")
-    st.stop()
+    if faltan:
+        st.warning(f"Debes completar todos los campos obligatorios: {', '.join(faltan)}")
+        st.stop()
 
     plantilla_path = f"{plantilla_nombre}.docx"
     if not os.path.exists(plantilla_path):
