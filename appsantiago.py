@@ -90,7 +90,7 @@ else:
 # Botón de generar
 if st.button("✅ Generar etiqueta"):
     campos = {
-        "denominacion_cientifico": producto,
+        "denominacion_comercial": producto,
         "nombre_cientifico": nombre_cientifico,
         "ingredientes": ingredientes,
         "forma_captura": forma,
