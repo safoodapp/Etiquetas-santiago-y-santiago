@@ -5,6 +5,8 @@ from docxtpl import DocxTemplate
 import base64
 import os
 import locale
+from docx2pdf import convert
+
 
 # Configurar idioma del calendario (opcional)
 try:
@@ -89,10 +91,10 @@ else:
 # Botón de generar
 if st.button("✅ Generar etiqueta"):
     campos = {
-        "denominacion_comercial": producto,
+        "denominacion_cientifico": producto,
         "nombre_cientifico": nombre_cientifico,
         "ingredientes": ingredientes,
-        "forma_capturado": forma,
+        "forma_captura": forma,
         "zona_captura": zona,
         "pais_origen": pais,
         "arte_pesca": arte,
@@ -108,11 +110,26 @@ if st.button("✅ Generar etiqueta"):
     else:
         doc = DocxTemplate(plantilla_path)
         doc.render(campos)
-        output_path = f"ETIQUETA_{producto.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.docx"
-        doc.save(output_path)
 
-        with open(output_path, "rb") as file:
-            b64 = base64.b64encode(file.read()).decode()
-            href = f'<a href="data:application/octet-stream;base64,{b64}" download="{output_path}">📥 Descargar etiqueta Word</a>'
-            st.markdown(href, unsafe_allow_html=True)
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        output_docx = f"ETIQUETA_{producto.replace(' ', '_')}_{timestamp}.docx"
+        output_pdf = output_docx.replace(".docx", ".pdf")
 
+        # Guardar el archivo Word
+        doc.save(output_docx)
+
+        # Convertir a PDF
+        try:
+            convert(output_docx, output_pdf)
+
+            # Botón para descargar PDF
+            with open(output_pdf, "rb") as file:
+                b64_pdf = base64.b64encode(file.read()).decode()
+                st.markdown(f'<a href="data:application/pdf;base64,{b64_pdf}" download="{output_pdf}">📄 Descargar etiqueta PDF</a>', unsafe_allow_html=True)
+        except Exception as e:
+            st.warning(f"No se pudo generar el PDF automáticamente. Puedes usar el Word generado. Detalles: {e}")
+
+        # Botón para descargar Word
+        with open(output_docx, "rb") as file:
+            b64_docx = base64.b64encode(file.read()).decode()
+            st.markdown(f'<a href="data:application/octet-stream;base64,{b64_docx}" download="{output_docx}">📥 Descargar etiqueta Word</a>', unsafe_allow_html=True)
