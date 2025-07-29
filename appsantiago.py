@@ -103,6 +103,23 @@ if st.button("✅ Generar etiqueta"):
         "fecha_caducidad": fecha_caducidad.strftime("%d/%m/%Y") if fecha_caducidad else ""
     }
 
+# Validación de campos obligatorios
+campos_obligatorios = {
+    "Producto": producto,
+    "Forma de captura": forma,
+    "Zona de captura": zona,
+    "País de origen": pais,
+    "Arte de pesca": arte,
+    "Peso": peso,
+    "Lote": lote
+}
+
+faltan = [k for k, v in campos_obligatorios.items() if not v or v == "Selecciona una opción"]
+
+if faltan:
+    st.warning(f"Debes completar todos los campos obligatorios: {', '.join(faltan)}")
+    st.stop()
+
     plantilla_path = f"{plantilla_nombre}.docx"
     if not os.path.exists(plantilla_path):
         st.error(f"No se encontró la plantilla: {plantilla_path}")
