@@ -6,7 +6,6 @@ import base64
 import os
 import locale
 
-
 # Configurar idioma del calendario (opcional)
 try:
     locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
@@ -73,7 +72,7 @@ zona = st.selectbox("Zona de captura", zonas)
 pais = st.selectbox("País de origen", paises)
 arte = st.selectbox("Arte de pesca", artes)
 
-peso = st.text_input("Peso del producto")
+# ⬇️ Eliminado el campo 'peso'
 lote = st.text_input("Lote")
 
 usar_fecha_descongelacion = st.checkbox("¿Indicar fecha de descongelación?")
@@ -86,30 +85,30 @@ if usar_fecha_descongelacion:
     st.text_input("Fecha de caducidad", value=fecha_caducidad.strftime("%d/%m/%Y"), disabled=True)
 else:
     fecha_caducidad = st.date_input("Fecha de caducidad (manual)", format="DD/MM/YYYY")
+
 # Botón de generar
 if st.button("✅ Generar etiqueta"):
     campos = {
         "denominacion_comercial": producto,
         "nombre_cientifico": nombre_cientifico,
         "ingredientes": ingredientes,
-        "forma_captura": forma,
+        "forma_captura": forma,     # ojo: en plantilla usa {{forma_captura}}
         "zona_captura": zona,
         "pais_origen": pais,
         "arte_pesca": arte,
-        "peso": peso,
+        # "peso" eliminado
         "lote": lote,
         "fecha_descongelacion": fecha_descongelacion.strftime("%d/%m/%Y") if fecha_descongelacion else "",
         "fecha_caducidad": fecha_caducidad.strftime("%d/%m/%Y") if fecha_caducidad else ""
     }
 
-    # Validación de campos obligatorios
+    # Validación de campos obligatorios (peso eliminado)
     campos_obligatorios = {
         "Producto": producto,
         "Forma de captura": forma,
         "Zona de captura": zona,
         "País de origen": pais,
         "Arte de pesca": arte,
-        "Peso": peso,
         "Lote": lote
     }
 
@@ -132,6 +131,9 @@ if st.button("✅ Generar etiqueta"):
 
         with open(output_docx, "rb") as file:
             b64_docx = base64.b64encode(file.read()).decode()
-            st.markdown(f'<a href="data:application/octet-stream;base64,{b64_docx}" download="{output_docx}">📥 Descargar etiqueta Word</a>', unsafe_allow_html=True)
+            st.markdown(
+                f'<a href="data:application/octet-stream;base64,{b64_docx}" download="{output_docx}">📥 Descargar etiqueta Word</a>',
+                unsafe_allow_html=True
+            )
 
-        st.info("Si necesitas el archivo en PDF, puedes abrir el Word descargado y guardarlo como PDF desde Word o Google Docs.")
+        st.info("Si necesitas el archivo en PDF, abre el Word descargado y guárdalo como PDF desde Word o Google Docs.")
