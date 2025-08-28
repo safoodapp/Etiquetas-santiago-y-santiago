@@ -2,5 +2,6 @@ streamlit
 pandas
 openpyxl
 docxtpl
-st_gsheets_connection
+st-gsheets-connection
+
 
