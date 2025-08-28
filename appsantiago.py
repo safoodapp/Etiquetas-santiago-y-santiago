@@ -63,6 +63,10 @@ except Exception:
     st.error("No se pudo crear la conexión a Google Sheets. Revisa los *Secrets*.")
     st.stop()
 
+st.write("✅ Correo de la cuenta de servicio:", st.secrets["gcp_service_account"]["client_email"])
+st.write("✅ Spreadsheet URL:", SPREADSHEET_URL)
+st.write("✅ Worksheet:", WORKSHEET_NAME)
+
 COLUMNAS = [
     "denominacion_comercial",
     "nombre_cientifico",
@@ -259,6 +263,7 @@ if st.button("✅ Generar etiqueta"):
             )
 
         st.info("Si necesitas el archivo en PDF, abre el Word descargado y guárdalo como PDF desde Word o Google Docs.")
+
 
 
 
