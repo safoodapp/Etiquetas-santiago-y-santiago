@@ -49,7 +49,7 @@ def resolver_plantilla(denominacion: str, plantilla_excel: str | None = None) ->
 # --------------------------
 # Conexión a Google Sheets
 # --------------------------
-from streamlit_gsheets import GSheetsConnection
+from st_gsheets_connection import GSheetsConnection
 
 st.set_page_config(page_title="Etiquetas de Santiago y Santiago", layout="centered")
 
