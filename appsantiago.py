@@ -6,6 +6,7 @@ from docxtpl import DocxTemplate
 import base64
 import os
 import locale
+from st_gsheets_connection import GSheetsConnection
 
 # --------------------------
 # Config regional (opcional)
@@ -258,5 +259,6 @@ if st.button("✅ Generar etiqueta"):
             )
 
         st.info("Si necesitas el archivo en PDF, abre el Word descargado y guárdalo como PDF desde Word o Google Docs.")
+
 
 
