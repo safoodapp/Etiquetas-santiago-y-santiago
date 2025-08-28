@@ -58,7 +58,7 @@ st.set_page_config(page_title="Etiquetas de Santiago y Santiago", layout="center
 try:
     conn: GSheetsConnection = st.connection("gsheets", type=GSheetsConnection)
     SPREADSHEET_URL = st.secrets["connections"]["gsheets"]["spreadsheet"]
-    WORKSHEET_NAME  = st.secrets["connections"]["gsheets"].get("worksheet", "Datos")
+   WORKSHEET_NAME = st.secrets["connections"]["gsheets"]["worksheet"]
 except Exception:
     st.error("No se pudo crear la conexión a Google Sheets. Revisa los *Secrets*.")
     st.stop()
@@ -259,6 +259,7 @@ if st.button("✅ Generar etiqueta"):
             )
 
         st.info("Si necesitas el archivo en PDF, abre el Word descargado y guárdalo como PDF desde Word o Google Docs.")
+
 
 
 
