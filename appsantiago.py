@@ -77,10 +77,10 @@ COLUMNAS = [
 
 @st.cache_data(ttl=20)
 def leer_df_gs() -> pd.DataFrame:
-    df_gs = conn.read(spreadsheet=SPREADSHEET_URL, worksheet=WORKSHEET_NAME)
+    df_gs = conn.read(worksheet=WORKSHEET_NAME)
     if df_gs is None or df_gs.empty:
         df_gs = pd.DataFrame({c: [] for c in COLUMNAS})
-        conn.update(spreadsheet=SPREADSHEET_URL, worksheet=WORKSHEET_NAME, data=df_gs)
+        conn.update(worksheet=WORKSHEET_NAME, data=df_gs)
     else:
         df_gs.columns = [str(c).strip() for c in df_gs.columns]
         for c in COLUMNAS:
@@ -90,7 +90,7 @@ def leer_df_gs() -> pd.DataFrame:
     return df_gs
 
 def guardar_df_gs(df_gs: pd.DataFrame):
-    conn.update(spreadsheet=SPREADSHEET_URL, worksheet=WORKSHEET_NAME, data=df_gs)
+    conn.update(worksheet=WORKSHEET_NAME, data=df_gs)
     leer_df_gs.clear()
 
 def opciones_columna(df: pd.DataFrame, col: str):
@@ -259,6 +259,7 @@ if st.button("✅ Generar etiqueta"):
             )
 
         st.info("Si necesitas el archivo en PDF, abre el Word descargado y guárdalo como PDF desde Word o Google Docs.")
+
 
 
 
