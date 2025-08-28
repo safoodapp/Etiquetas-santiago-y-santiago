@@ -92,6 +92,9 @@ def leer_df_gs() -> pd.DataFrame:
                 df_gs[c] = ""
         df_gs = df_gs[COLUMNAS].fillna("").astype(str)
     return df_gs
+# 🚀 PRUEBA: leer la hoja y mostrar las primeras filas
+df = leer_df_gs()
+st.dataframe(df.head())
 
 def guardar_df_gs(df_gs: pd.DataFrame):
     conn.update(worksheet=WORKSHEET_NAME, data=df_gs)
@@ -263,6 +266,7 @@ if st.button("✅ Generar etiqueta"):
             )
 
         st.info("Si necesitas el archivo en PDF, abre el Word descargado y guárdalo como PDF desde Word o Google Docs.")
+
 
 
 
