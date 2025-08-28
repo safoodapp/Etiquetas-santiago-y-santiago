@@ -1,3 +1,4 @@
+# Commit for reinstall dependencies
 import streamlit as st
 import pandas as pd
 from datetime import datetime, timedelta
@@ -257,4 +258,5 @@ if st.button("✅ Generar etiqueta"):
             )
 
         st.info("Si necesitas el archivo en PDF, abre el Word descargado y guárdalo como PDF desde Word o Google Docs.")
+
 
