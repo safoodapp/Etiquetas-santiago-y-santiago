@@ -51,7 +51,7 @@ def resolver_plantilla(denominacion: str, plantilla_excel: str | None = None) ->
 # --------------------------
 # Conexión a Google Sheets
 # --------------------------
-from st_gsheets_connection import GSheetsConnection
+from streamlit_gsheets import GSheetsConnection
 
 st.set_page_config(page_title="Etiquetas de Santiago y Santiago", layout="centered")
 
@@ -259,6 +259,7 @@ if st.button("✅ Generar etiqueta"):
             )
 
         st.info("Si necesitas el archivo en PDF, abre el Word descargado y guárdalo como PDF desde Word o Google Docs.")
+
 
 
 
