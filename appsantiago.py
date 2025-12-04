@@ -1,26 +1,24 @@
 import streamlit as st
 import pandas as pd
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta
 from docxtpl import DocxTemplate
+import base64
 import os
 import locale
 
-# -----------------------------
-# Configuración
-# -----------------------------
+# Configurar idioma del calendario (opcional)
 try:
     locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
-except Exception:
+except:
     try:
         locale.setlocale(locale.LC_TIME, 'es_ES')
-    except Exception:
+    except:
         pass
 
+# Configurar página
 st.set_page_config(page_title="Etiquetas de Santiago y Santiago", layout="centered")
 
-# -----------------------------
-# Portada
-# -----------------------------
+# Mostrar portada
 if "mostrar_formulario" not in st.session_state:
     st.session_state.mostrar_formulario = False
 
@@ -30,42 +28,31 @@ if not st.session_state.mostrar_formulario:
         st.session_state.mostrar_formulario = True
     st.stop()
 
-# -----------------------------
-# Carga de datos
-# -----------------------------
-EXCEL_PATH = "ETIQUETA.xlsx"
-SHEET_NAME = "Santiago y Santiago"
+# Cargar datos desde Google Sheets
+url = "https://docs.google.com/spreadsheets/d/1M-1zM8pxosv75N5gCtWaPkE1beQBOaMD/export?format=csv&gid=707739207"
 
 try:
-    df = pd.read_excel(EXCEL_PATH, sheet_name=SHEET_NAME)
+    df = pd.read_csv(url)
 except Exception as e:
-    st.error(f"Error al cargar el archivo {EXCEL_PATH}: {e}")
+    st.error(f"Error al cargar datos desde Google Sheets: {e}")
     st.stop()
 
-# -----------------------------
-# Utilidades
-# -----------------------------
 
-def opciones_columna(col: str):
+# Preparar opciones
+def opciones_columna(col):
     try:
-        serie = df[col].dropna()
-        vals = sorted({str(x).strip() for x in serie if str(x).strip()})
-        return ["Selecciona una opción"] + list(vals)
-    except Exception:
+        lista = sorted([str(x) for x in df[col].dropna().unique() if isinstance(x, str)])
+        return ["Selecciona una opción"] + lista
+    except:
         return ["Selecciona una opción"]
 
-# -----------------------------
-# Opciones desde Excel
-# -----------------------------
 productos = opciones_columna("denominacion_comercial")
 formas = opciones_columna("forma_capturado")
 zonas = opciones_columna("zona_captura")
 paises = opciones_columna("pais_origen")
 artes = opciones_columna("arte_pesca")
 
-# -----------------------------
 # Formulario
-# -----------------------------
 st.header("🧾 Crear nueva etiqueta")
 
 producto = st.selectbox("Producto", productos)
@@ -83,93 +70,74 @@ else:
 st.text_input("Nombre científico", value=nombre_cientifico, disabled=True)
 st.text_area("Ingredientes", value=ingredientes, disabled=True)
 
-# Forma de producción / captura
-forma = st.radio("Forma de capturado", formas, horizontal=True, index=0)
-
-# Detectar acuicultura (de cría)
-forma_lower = (forma or "").lower()
-es_de_cria = any(p in forma_lower for p in ["cría", "de cría", "acuicultura", "de cultivo", "piscifactor"]) and forma != "Selecciona una opción"
-
-# Campos condicionales: si es de cría, NO se muestran zona de captura ni arte de pesca
-if not es_de_cria:
-    zona = st.selectbox("Zona de captura", zonas)
-    arte = st.selectbox("Arte de pesca", artes)
-else:
-    zona = ""
-    arte = ""
-
+forma = st.radio("Forma de capturado", formas, horizontal=True)
+zona = st.selectbox("Zona de captura", zonas)
 pais = st.selectbox("País de origen", paises)
+arte = st.selectbox("Arte de pesca", artes)
 
+# ⬇️ Eliminado el campo 'peso'
 lote = st.text_input("Lote")
 
 usar_fecha_descongelacion = st.checkbox("¿Indicar fecha de descongelación?")
-fecha_descongelacion: date | None = None
-fecha_caducidad: date | None = None
+fecha_descongelacion = None
+fecha_caducidad = None
 
 if usar_fecha_descongelacion:
-    fecha_descongelacion = st.date_input("Fecha de descongelación", value=date.today())
+    fecha_descongelacion = st.date_input("Fecha de descongelación", format="DD/MM/YYYY")
     fecha_caducidad = fecha_descongelacion + timedelta(days=3)
     st.text_input("Fecha de caducidad", value=fecha_caducidad.strftime("%d/%m/%Y"), disabled=True)
 else:
-    fecha_caducidad = st.date_input("Fecha de caducidad (manual)", value=date.today())
+    fecha_caducidad = st.date_input("Fecha de caducidad (manual)", format="DD/MM/YYYY")
 
-# -----------------------------
-# Generar
-# -----------------------------
+# Botón de generar
 if st.button("✅ Generar etiqueta"):
     campos = {
         "denominacion_comercial": producto,
         "nombre_cientifico": nombre_cientifico,
         "ingredientes": ingredientes,
-        "forma_captura": forma,
+        "forma_captura": forma,     # ojo: en plantilla usa {{forma_captura}}
         "zona_captura": zona,
         "pais_origen": pais,
         "arte_pesca": arte,
+        # "peso" eliminado
         "lote": lote,
         "fecha_descongelacion": fecha_descongelacion.strftime("%d/%m/%Y") if fecha_descongelacion else "",
-        "fecha_caducidad": fecha_caducidad.strftime("%d/%m/%Y") if fecha_caducidad else "",
-        "metodo_produccion": "Acuicultura" if es_de_cria else "Pesca extractiva",
+        "fecha_caducidad": fecha_caducidad.strftime("%d/%m/%Y") if fecha_caducidad else ""
     }
 
-    # Validación de obligatorios: si es de cría, NO exigimos zona ni arte
-    obligatorios_comunes = {
+    # Validación de campos obligatorios (peso eliminado)
+    campos_obligatorios = {
         "Producto": producto,
         "Forma de captura": forma,
-        "País de origen": pais,
-        "Lote": lote,
-    }
-
-    obligatorios_mar = {} if es_de_cria else {
         "Zona de captura": zona,
+        "País de origen": pais,
         "Arte de pesca": arte,
+        "Lote": lote
     }
 
-    faltan = [k for k, v in {**obligatorios_comunes, **obligatorios_mar}.items() if not v or v == "Selecciona una opción"]
+    faltan = [k for k, v in campos_obligatorios.items() if not v or v == "Selecciona una opción"]
+
     if faltan:
         st.warning(f"Debes completar todos los campos obligatorios: {', '.join(faltan)}")
         st.stop()
 
+
     plantilla_path = f"{plantilla_nombre}.docx"
     if not os.path.exists(plantilla_path):
         st.error(f"No se encontró la plantilla: {plantilla_path}")
-        st.stop()
-
-    try:
+    else:
         doc = DocxTemplate(plantilla_path)
         doc.render(campos)
 
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        safe_prod = (producto or "ETIQUETA").replace(" ", "_")
-        output_docx = f"ETIQUETA_{safe_prod}_{timestamp}.docx"
+        output_docx = f"ETIQUETA_{producto.replace(' ', '_')}_{timestamp}.docx"
         doc.save(output_docx)
 
-        with open(output_docx, "rb") as f:
-            st.download_button(
-                label="📥 Descargar etiqueta (Word)",
-                data=f.read(),
-                file_name=output_docx,
-                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        with open(output_docx, "rb") as file:
+            b64_docx = base64.b64encode(file.read()).decode()
+            st.markdown(
+                f'<a href="data:application/octet-stream;base64,{b64_docx}" download="{output_docx}">📥 Descargar etiqueta Word</a>',
+                unsafe_allow_html=True
             )
-        st.info("Si necesitas el archivo en PDF, abre el Word descargado y guárdalo como PDF.")
-    except Exception as e:
-        st.error(f"No se pudo generar la etiqueta: {e}")
+
+        st.info("Si necesitas el archivo en PDF, abre el Word descargado y guárdalo como PDF desde Word o Google Docs.")
