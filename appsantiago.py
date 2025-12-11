@@ -101,17 +101,28 @@ else:
 # Botón de generar
 if st.button("✅ Generar etiqueta"):
 
+    # Asegurar que ningún campo es None
+    producto = producto or ""
+    nombre_cientifico = nombre_cientifico or ""
+    ingredientes = ingredientes or ""
+    forma = forma or ""
+    zona = zona or "N/A"
+    arte = arte or "N/A"
+    pais = pais or ""
+    lote = lote or ""
+
+    # Crear campos
     campos = {
         "denominacion_comercial": producto,
         "nombre_cientifico": nombre_cientifico,
         "ingredientes": ingredientes,
-        "forma_captura": forma, 
+        "forma_captura": forma,
         "zona_captura": zona,
         "pais_origen": pais,
         "arte_pesca": arte,
         "lote": lote,
         "fecha_descongelacion": fecha_descongelacion.strftime("%d/%m/%Y") if fecha_descongelacion else "",
-        "fecha_caducidad": fecha_caducidad.strftime("%d/%m/%Y") if fecha_caducidad else ""
+        "fecha_caducidad": fecha_caducidad.strftime("%d/%m/%Y") if fecha_caducidad else "",
     }
 
     # Validación
@@ -134,7 +145,7 @@ if st.button("✅ Generar etiqueta"):
         st.warning(f"Debes completar todos los campos obligatorios: {', '.join(faltan)}")
         st.stop()
 
-    # ⬇️⬇️ ESTO VA *FUERA* DEL IF FALTAN ⬇️⬇️
+    # ⬇️⬇️ ESTE BLOQUE SIEMPRE SE EJECUTA (fuera del if faltan)
     plantilla_path = f"{plantilla_nombre}.docx"
     if not os.path.exists(plantilla_path):
         st.error(f"No se encontró la plantilla: {plantilla_path}")
