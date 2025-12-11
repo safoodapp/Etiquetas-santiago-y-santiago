@@ -71,22 +71,9 @@ st.text_input("Nombre científico", value=nombre_cientifico, disabled=True)
 st.text_area("Ingredientes", value=ingredientes, disabled=True)
 
 forma = st.radio("Forma de capturado", formas, horizontal=True)
-
-forma = st.radio("Forma de capturado", formas, horizontal=True)
-
-# Detectar acuicultura de forma segura
-es_acuicultura = ("acui" in forma.lower()) or ("cría" in forma.lower()) or ("cria" in forma.lower())
-
-if es_acuicultura:
-    zona = "N/A"
-    arte = "N/A"
-    st.info("Zona de captura y Arte de pesca no aplican a productos de acuicultura.")
-else:
-    zona = st.selectbox("Zona de captura", zonas)
-    arte = st.selectbox("Arte de pesca", artes)
-
+zona = st.selectbox("Zona de captura", zonas)
 pais = st.selectbox("País de origen", paises)
-
+arte = st.selectbox("Arte de pesca", artes)
 
 # ⬇️ Eliminado el campo 'peso'
 lote = st.text_input("Lote")
@@ -102,51 +89,31 @@ if usar_fecha_descongelacion:
 else:
     fecha_caducidad = st.date_input("Fecha de caducidad (manual)", format="DD/MM/YYYY")
 
-DEBUG forma → capturado
-DEBUG es_acuicultura → False
-DEBUG zona → Selecciona una opción
-DEBUG arte → Selecciona una opción
-
 # Botón de generar
 if st.button("✅ Generar etiqueta"):
-
-    # Asegurar que ningún campo es None
-    producto = producto or ""
-    nombre_cientifico = nombre_cientifico or ""
-    ingredientes = ingredientes or ""
-    forma = forma or ""
-    zona = zona or "N/A"
-    arte = arte or "N/A"
-    pais = pais or ""
-    lote = lote or ""
-
-    # Crear campos
     campos = {
         "denominacion_comercial": producto,
         "nombre_cientifico": nombre_cientifico,
         "ingredientes": ingredientes,
-        "forma_captura": forma,
+        "forma_captura": forma,     # ojo: en plantilla usa {{forma_captura}}
         "zona_captura": zona,
         "pais_origen": pais,
         "arte_pesca": arte,
+        # "peso" eliminado
         "lote": lote,
         "fecha_descongelacion": fecha_descongelacion.strftime("%d/%m/%Y") if fecha_descongelacion else "",
-        "fecha_caducidad": fecha_caducidad.strftime("%d/%m/%Y") if fecha_caducidad else "",
+        "fecha_caducidad": fecha_caducidad.strftime("%d/%m/%Y") if fecha_caducidad else ""
     }
 
-    # Validación
+    # Validación de campos obligatorios (peso eliminado)
     campos_obligatorios = {
         "Producto": producto,
         "Forma de captura": forma,
+        "Zona de captura": zona,
         "País de origen": pais,
+        "Arte de pesca": arte,
         "Lote": lote
     }
-
-    if zona != "N/A":
-        campos_obligatorios["Zona de captura"] = zona
-
-    if arte != "N/A":
-        campos_obligatorios["Arte de pesca"] = arte
 
     faltan = [k for k, v in campos_obligatorios.items() if not v or v == "Selecciona una opción"]
 
@@ -154,7 +121,7 @@ if st.button("✅ Generar etiqueta"):
         st.warning(f"Debes completar todos los campos obligatorios: {', '.join(faltan)}")
         st.stop()
 
-    # ⬇️⬇️ ESTE BLOQUE SIEMPRE SE EJECUTA (fuera del if faltan)
+
     plantilla_path = f"{plantilla_nombre}.docx"
     if not os.path.exists(plantilla_path):
         st.error(f"No se encontró la plantilla: {plantilla_path}")
