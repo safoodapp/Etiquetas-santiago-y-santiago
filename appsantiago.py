@@ -100,41 +100,41 @@ else:
 
 # Botón de generar
 if st.button("✅ Generar etiqueta"):
+
     campos = {
         "denominacion_comercial": producto,
         "nombre_cientifico": nombre_cientifico,
         "ingredientes": ingredientes,
-        "forma_captura": forma,     # ojo: en plantilla usa {{forma_captura}}
+        "forma_captura": forma, 
         "zona_captura": zona,
         "pais_origen": pais,
         "arte_pesca": arte,
-        # "peso" eliminado
         "lote": lote,
         "fecha_descongelacion": fecha_descongelacion.strftime("%d/%m/%Y") if fecha_descongelacion else "",
         "fecha_caducidad": fecha_caducidad.strftime("%d/%m/%Y") if fecha_caducidad else ""
     }
 
-# Validación de campos obligatorios (peso eliminado)
-campos_obligatorios = {
-    "Producto": producto,
-    "Forma de captura": forma,
-    "País de origen": pais,
-    "Lote": lote
-}
+    # Validación
+    campos_obligatorios = {
+        "Producto": producto,
+        "Forma de captura": forma,
+        "País de origen": pais,
+        "Lote": lote
+    }
 
-# Solo obligatorios si NO es acuicultura
-if zona != "N/A":
-    campos_obligatorios["Zona de captura"] = zona
+    if zona != "N/A":
+        campos_obligatorios["Zona de captura"] = zona
 
-if arte != "N/A":
-    campos_obligatorios["Arte de pesca"] = arte
+    if arte != "N/A":
+        campos_obligatorios["Arte de pesca"] = arte
 
-faltan = [k for k, v in campos_obligatorios.items() if not v or v == "Selecciona una opción"]
+    faltan = [k for k, v in campos_obligatorios.items() if not v or v == "Selecciona una opción"]
 
-if faltan:
-    st.warning(f"Debes completar todos los campos obligatorios: {', '.join(faltan)}")
-    st.stop()
+    if faltan:
+        st.warning(f"Debes completar todos los campos obligatorios: {', '.join(faltan)}")
+        st.stop()
 
+    # ⬇️⬇️ ESTO VA *FUERA* DEL IF FALTAN ⬇️⬇️
     plantilla_path = f"{plantilla_nombre}.docx"
     if not os.path.exists(plantilla_path):
         st.error(f"No se encontró la plantilla: {plantilla_path}")
