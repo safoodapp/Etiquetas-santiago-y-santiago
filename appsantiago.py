@@ -72,15 +72,17 @@ st.text_area("Ingredientes", value=ingredientes, disabled=True)
 
 forma = st.radio("Forma de capturado", formas, horizontal=True)
 
-# Ajustar zona FAO y arte de pesca si es acuicultura
-if forma.strip().lower() == "acuicultura":
+# Si es acuicultura → ocultar zona y arte, usar N/A
+if forma.strip().lower() in ["de cría (acuicultura)", "acuicultura", "de cria (acuicultura)", "de cría"]:
     zona = "N/A"
     arte = "N/A"
+    st.info("Zona de captura y Arte de pesca no aplican a productos de acuicultura.")
 else:
     zona = st.selectbox("Zona de captura", zonas)
     arte = st.selectbox("Arte de pesca", artes)
 
 pais = st.selectbox("País de origen", paises)
+
 
 # ⬇️ Eliminado el campo 'peso'
 lote = st.text_input("Lote")
@@ -112,22 +114,26 @@ if st.button("✅ Generar etiqueta"):
         "fecha_caducidad": fecha_caducidad.strftime("%d/%m/%Y") if fecha_caducidad else ""
     }
 
-    # Validación de campos obligatorios (peso eliminado)
-    campos_obligatorios = {
-        "Producto": producto,
-        "Forma de captura": forma,
-        "Zona de captura": zona,
-        "País de origen": pais,
-        "Arte de pesca": arte,
-        "Lote": lote
-    }
+# Validación de campos obligatorios (peso eliminado)
+campos_obligatorios = {
+    "Producto": producto,
+    "Forma de captura": forma,
+    "País de origen": pais,
+    "Lote": lote
+}
 
-    faltan = [k for k, v in campos_obligatorios.items() if not v or v == "Selecciona una opción"]
+# Solo obligatorios si NO es acuicultura
+if zona != "N/A":
+    campos_obligatorios["Zona de captura"] = zona
 
-    if faltan:
-        st.warning(f"Debes completar todos los campos obligatorios: {', '.join(faltan)}")
-        st.stop()
+if arte != "N/A":
+    campos_obligatorios["Arte de pesca"] = arte
 
+faltan = [k for k, v in campos_obligatorios.items() if not v or v == "Selecciona una opción"]
+
+if faltan:
+    st.warning(f"Debes completar todos los campos obligatorios: {', '.join(faltan)}")
+    st.stop()
 
     plantilla_path = f"{plantilla_nombre}.docx"
     if not os.path.exists(plantilla_path):
