@@ -72,8 +72,12 @@ st.text_area("Ingredientes", value=ingredientes, disabled=True)
 
 forma = st.radio("Forma de capturado", formas, horizontal=True)
 
-# Si es acuicultura → ocultar zona y arte, usar N/A
-if forma.strip().lower() in ["de cría (acuicultura)", "acuicultura", "de cria (acuicultura)", "de cría"]:
+forma = st.radio("Forma de capturado", formas, horizontal=True)
+
+# Detectar acuicultura de forma segura
+es_acuicultura = ("acui" in forma.lower()) or ("cría" in forma.lower()) or ("cria" in forma.lower())
+
+if es_acuicultura:
     zona = "N/A"
     arte = "N/A"
     st.info("Zona de captura y Arte de pesca no aplican a productos de acuicultura.")
@@ -97,6 +101,11 @@ if usar_fecha_descongelacion:
     st.text_input("Fecha de caducidad", value=fecha_caducidad.strftime("%d/%m/%Y"), disabled=True)
 else:
     fecha_caducidad = st.date_input("Fecha de caducidad (manual)", format="DD/MM/YYYY")
+
+DEBUG forma → capturado
+DEBUG es_acuicultura → False
+DEBUG zona → Selecciona una opción
+DEBUG arte → Selecciona una opción
 
 # Botón de generar
 if st.button("✅ Generar etiqueta"):
